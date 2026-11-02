@@ -1,0 +1,5 @@
+* text=auto
+gradlew text eol=lf
+*.bat text eol=crlf
+*.jar binary
+app/src/main/assets/ui/** linguist-generated=true

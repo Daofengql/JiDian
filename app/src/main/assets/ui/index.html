@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="zh-CN" class="mdui-theme-light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f9f8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.is.autonavi.com https://tile.openstreetmap.org; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'none'">
+  <title>JiDian · 模拟定位</title>
+  <link rel="stylesheet" href="./app.css">
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <div class="app-shell" id="appShell">
+    <main class="workspace">
+      <section class="map-workspace" aria-label="位置与路线编辑">
+        <div class="map-card" id="mapCard">
+          <div id="map" aria-label="交互地图，点击选择位置" role="region"></div>
+          <div class="map-top"><mdui-button id="coordinateButton" class="coordinate-button" variant="elevated"><span slot="icon" data-icon="crosshair"></span><span id="coordinateButtonLabel">输入坐标</span></mdui-button><div class="map-actions" aria-label="应用工具"><mdui-button-icon id="systemOverlayButton" aria-label="开启后台悬浮小地图" title="后台悬浮小地图"><span data-icon="picture"></span></mdui-button-icon><mdui-button-icon id="permissionButton" aria-label="运行环境与定位模式" title="运行环境"><span data-icon="shield"></span></mdui-button-icon><mdui-button-icon id="themeButton" aria-label="切换深色模式"><span data-icon="moon"></span></mdui-button-icon><mdui-button-icon id="helpButton" aria-label="使用帮助"><span data-icon="help"></span></mdui-button-icon></div></div>
+          <div class="tile-message" id="tileMessage" hidden><span>底图暂时无法加载，仍可输入坐标选点</span><mdui-button variant="text" id="retryTiles">重试</mdui-button></div>
+          <div class="map-tools" aria-label="地图工具"><mdui-button-icon id="zoomIn" aria-label="放大地图"><span data-icon="plus"></span></mdui-button-icon><mdui-button-icon id="zoomOut" aria-label="缩小地图"><span data-icon="minus"></span></mdui-button-icon><span class="tool-divider"></span><mdui-button-icon id="centerMap" aria-label="回到所选位置"><span data-icon="crosshair"></span></mdui-button-icon><mdui-button-icon id="refreshPoint" aria-label="立即刷新定点位置" hidden><span data-icon="refresh"></span></mdui-button-icon><mdui-button-icon id="mapLayer" aria-label="选择地图图层" title="地图图层"><span data-icon="layers"></span></mdui-button-icon></div>
+          <div class="route-tools" id="routeTools" hidden><mdui-button variant="elevated" id="undoPoint"><span slot="icon" data-icon="undo"></span>撤销</mdui-button><mdui-button-icon id="clearRoute" aria-label="清空路线"><span data-icon="trash"></span></mdui-button-icon></div>
+          <div class="selection-card" id="selectionCard"><span class="selection-icon" data-icon="pin" id="selectionIcon"></span><div class="selection-content"><div class="selection-heading"><strong id="selectionTitle">已选位置</strong><span class="coordinate-system">WGS-84</span></div><div class="coordinate-value" id="selectionValue">39.90870° N, 116.39750° E</div><span class="selection-hint" id="selectionHint">点击地图更换位置，也可以拖动标记</span></div><mdui-button-icon id="selectionAction" aria-label="复制所选坐标"><span data-icon="copy"></span></mdui-button-icon></div>
+        </div>
+      </section>
+
+      <aside class="control-panel" id="floatingPanel" aria-label="模拟悬浮控制面板">
+        <div class="floating-toolbar"><mdui-segmented-button-group id="modeGroup" selects="single" value="SINGLE_POINT" aria-label="模拟模式"><mdui-segmented-button value="SINGLE_POINT"><span slot="icon" data-icon="pin"></span>定点</mdui-segmented-button><mdui-segmented-button value="ROUTE_TRACK"><span slot="icon" data-icon="route"></span>路线</mdui-segmented-button></mdui-segmented-button-group><mdui-button-icon id="joystickToggle" aria-label="展开路线摇杆" aria-expanded="false" hidden><span data-icon="joystick"></span></mdui-button-icon><mdui-button id="panelToggle" variant="tonal" aria-expanded="false" aria-controls="floatingSettings"><span slot="icon" data-icon="tune"></span><span id="panelToggleLabel">参数</span></mdui-button></div>
+        <section class="joystick-panel" id="joystickPanel" hidden aria-label="路线手动控制"><div id="joystickPad" class="joystick-pad" role="slider" tabindex="0" aria-label="方向摇杆，拖动或用方向键移动，松开即停" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span class="joystick-cross"></span><span class="joystick-knob" id="joystickKnob"></span></div><div class="joystick-info"><strong id="manualState">沿路线行进</strong><span>北 ↑ · 拖动控制方向<br>松开停住，距离控制速度</span><mdui-button id="resumeRoute" variant="tonal">继续路线</mdui-button></div></section>
+        <div class="panel-scroll" id="floatingSettings" hidden>
+        <section class="point-card" id="pointCard" aria-label="定点模拟选项">
+          <div class="section-heading"><div><span class="eyebrow">停在你选择的位置</span><h2>定点选项</h2></div><span class="section-symbol" data-icon="pin"></span></div>
+          <div class="point-options">
+            <label class="switch-row"><span><strong>轻微抖动模拟</strong><small id="locationJitterSummary">关闭时精确保持所选坐标</small></span><mdui-switch id="locationJitterSwitch" aria-label="轻微抖动模拟"></mdui-switch></label>
+            <label class="switch-row"><span><strong>基站模拟</strong><small>目前仅计算附近基站，尚未注入应用</small></span><mdui-switch id="cellSwitch" aria-label="基站模拟"></mdui-switch></label>
+            <label class="switch-row"><span><strong>海拔模拟</strong><small id="altitudeSummary">关闭时不上报模拟海拔</small></span><mdui-switch id="altitudeSwitch" aria-label="海拔模拟"></mdui-switch></label>
+          </div>
+          <button class="setting-link" id="pointSettings"><span class="setting-link-icon" data-icon="tune"></span><span><strong>定点参数</strong><small id="pointSummary">抖动范围、海拔与更新频率</small></span><span data-icon="chevron"></span></button>
+        </section>
+        <section class="movement-card" id="movementCard" hidden aria-label="路线运动参数">
+          <div class="section-heading"><div><span class="eyebrow">按你的节奏</span><h2>路线运动</h2></div><span class="section-symbol" data-icon="activity"></span></div>
+          <div class="speed-heading"><label id="speedLabel">速度模拟</label><div class="speed-value"><strong id="speedValue">15</strong><span>km/h</span></div></div>
+          <div class="speed-presets" aria-label="速度预设"><mdui-button variant="outlined" data-speed="5">步行<span>5</span></mdui-button><mdui-button variant="outlined" data-speed="10">慢跑<span>10</span></mdui-button><mdui-button variant="outlined" data-speed="20">骑行<span>20</span></mdui-button></div>
+          <mdui-slider id="speedSlider" min="0" max="60" step="0.5" value="15" aria-label="移动速度，公里每小时"></mdui-slider>
+          <div class="slider-labels"><span>0 km/h</span><span id="pacePreview">4′00″ /km</span><span>60 km/h</span></div>
+          <p class="speed-note" id="speedNote"><span data-icon="info"></span>按设定速度沿路线行进，可在运行时调整</p>
+          <div class="settings-divider"></div>
+          <button class="setting-link" id="cadenceSettings"><span class="setting-link-icon" data-icon="walk"></span><span><strong>步频模拟</strong><small id="cadenceSummary">智能步频 · 自然波动</small></span><span data-icon="chevron"></span></button>
+          <button class="setting-link" id="advancedSettings"><span class="setting-link-icon" data-icon="tune"></span><span><strong>路线设置</strong><small id="advancedSummary">往返循环 · 每秒更新</small></span><span data-icon="chevron"></span></button>
+        </section>
+
+        <section class="live-card" id="liveCard" aria-label="实时模拟数据"><div class="live-heading"><span class="live-dot"></span><h2>实时状态</h2><span id="liveStateLabel">等待开始</span></div><div class="live-grid" id="routeLiveGrid" hidden><div><span>累计步数</span><strong id="liveSteps">—<small>步</small></strong></div><div><span>实时步频</span><strong id="liveCadence">—<small>步/分</small></strong></div><div><span>实际速度</span><strong id="liveSpeed">—<small>km/h</small></strong></div><div><span>当前配速</span><strong id="livePace">—<small>/km</small></strong></div></div><div class="live-grid point-live-grid" id="pointLiveGrid"><div><span>位置抖动</span><strong id="liveJitter">—</strong></div><div><span>基站计算</span><strong id="liveCell">—</strong></div><div><span>模拟海拔</span><strong id="liveAltitude">—</strong></div><div><span>定位精度</span><strong id="liveAccuracy">—</strong></div></div><div class="live-location"><span data-icon="pin"></span><span id="liveLocation">开始后显示实时位置</span><mdui-button-icon id="followPosition" aria-label="跟随实时位置" title="跟随实时位置"><span data-icon="crosshair"></span></mdui-button-icon></div></section>
+        </div>
+        <div class="start-area"><div class="start-context"><span class="connection-status" id="connectionStatus"><i></i><span id="connectionLabel">未运行</span></span><span id="startContextDetail">坐标固定</span><mdui-button variant="text" id="liveDetailsButton" hidden>实时数据<span slot="end-icon" data-icon="chevron"></span></mdui-button></div><mdui-button id="toggleMock" class="start-button"><span slot="icon" id="startIcon" data-icon="play"></span><span id="startLabel">开始模拟</span></mdui-button></div>
+      </aside>
+    </main>
+  </div>
+
+  <mdui-dialog id="coordinateDialog" close-on-esc close-on-overlay-click headline="精确选点" class="coordinate-dialog"><p class="dialog-intro" id="coordinateIntro">输入 GPS 坐标，在地图上找到准确位置。</p><div class="coordinate-fields"><mdui-text-field id="latitudeInput" label="纬度" variant="outlined" type="text" inputmode="decimal" required helper="−90 至 90，北纬为正" autocomplete="off" spellcheck="false"></mdui-text-field><mdui-text-field id="longitudeInput" label="经度" variant="outlined" type="text" inputmode="decimal" required helper="−180 至 180，东经为正" autocomplete="off" spellcheck="false"></mdui-text-field></div><div class="dialog-note"><span data-icon="info"></span>使用 WGS-84 坐标，底图偏移会自动校正。</div><mdui-button slot="action" variant="text" data-close="coordinateDialog">取消</mdui-button><mdui-button slot="action" id="applyCoordinate">定位到这里</mdui-button></mdui-dialog>
+
+  <mdui-dialog id="importDialog" close-on-esc close-on-overlay-click headline="导入地点" class="import-dialog">
+    <p class="dialog-intro">粘贴地点、地图链接或包含地址／坐标的详情文本。</p>
+    <mdui-text-field id="importText" label="地址、链接或地点数据" variant="outlined" rows="3" maxlength="32768" autocomplete="off" spellcheck="false"></mdui-text-field>
+    <div id="importCandidates" class="import-candidates" aria-label="识别到的地点"></div>
+    <p id="importStatus" class="import-status" role="status" aria-live="polite">内容只在本机解析；不会打开链接或执行签到。</p>
+    <mdui-button id="lookupAddress" variant="tonal" hidden full-width>查找地址坐标</mdui-button>
+    <section id="importPreview" class="import-preview" hidden><strong id="importName">识别到位置</strong><p id="importAddress"></p><p id="importCoordinates"></p><p class="field-help" id="importSystemHelp">请选择来源坐标系，避免位置偏移。</p><mdui-segmented-button-group id="importSystem" selects="single" full-width aria-label="来源坐标系"><mdui-segmented-button value="WGS84">GPS</mdui-segmented-button><mdui-segmented-button value="GCJ02">高德</mdui-segmented-button><mdui-segmented-button value="BD09">百度</mdui-segmented-button></mdui-segmented-button-group></section>
+    <mdui-button slot="action" variant="text" data-close="importDialog">取消</mdui-button><mdui-button slot="action" id="applyImport" disabled>导入位置</mdui-button>
+  </mdui-dialog>
+
+  <mdui-dialog id="settingsDialog" close-on-esc close-on-overlay-click headline="模拟设置" class="settings-dialog">
+    <p class="dialog-intro">设置自动保存，运行时调整也会即时生效。</p>
+    <section class="dialog-section" id="pointSection" hidden>
+      <p class="field-help">在主界面分别开启抖动和海拔后，对应参数生效。</p>
+      <div class="field-value"><span>抖动半径</span><strong><span id="locationJitterValue">1</span> <small>米</small></strong></div>
+      <mdui-slider id="locationJitterSlider" min="0.5" max="10" step="0.5" value="1" aria-label="定点抖动半径，米"></mdui-slider>
+      <p class="field-help" id="locationJitterHelp">开启轻微抖动模拟后可调整</p>
+      <mdui-text-field id="altitudeInput" label="模拟海拔（米）" variant="outlined" type="text" inputmode="decimal" helper="−500 至 9000 米，可输入小数" autocomplete="off" spellcheck="false"></mdui-text-field>
+      <p class="field-help" id="altitudeHelp">开启海拔模拟后可调整</p>
+    </section>
+    <section class="dialog-section" id="cadenceSection" hidden>
+      <label class="switch-row"><span><strong>步频模拟</strong><small>仅用于路线，随移动速度生成步数和运动数据</small></span><mdui-switch id="sensorSwitch" aria-label="步频模拟" checked></mdui-switch></label>
+      <div id="cadenceControls"><mdui-segmented-button-group id="cadenceGroup" selects="single" value="AUTO_ADAPTIVE" full-width aria-label="步频模式"><mdui-segmented-button value="AUTO_ADAPTIVE">智能适应</mdui-segmented-button><mdui-segmented-button value="CUSTOM_FIXED">自定义步频</mdui-segmented-button></mdui-segmented-button-group><p class="field-help" id="cadenceHelp">随速度自动调整步频，静止时不计步。</p><div id="fixedCadence" hidden><div class="field-value"><span>目标步频</span><strong><span id="cadenceValue">175</span> <small>步/分</small></strong></div><mdui-slider id="cadenceSlider" min="40" max="240" step="1" value="175" aria-label="目标步频，步每分钟"></mdui-slider></div><label class="switch-row"><span><strong>自然波动</strong><small>步频在目标值附近小幅变化（±4%）</small></span><mdui-switch id="jitterSwitch" aria-label="步频自然波动" checked></mdui-switch></label></div>
+      <p class="capability-note">目前计算步频和步数；传感器数据尚未注入应用。</p>
+    </section>
+    <section class="dialog-section" id="advancedSection" hidden><label class="switch-row"><span><strong>路线往返循环</strong><small>到达终点后沿原路返回；关闭后停在终点</small></span><mdui-switch id="loopSwitch" aria-label="路线往返循环" checked></mdui-switch></label></section>
+    <div id="intervalSection"><div class="field-value"><span>位置更新频率</span><small>更高频率会增加耗电</small></div><mdui-segmented-button-group id="intervalGroup" selects="single" value="1000" full-width aria-label="位置更新频率"><mdui-segmented-button value="500">0.5 秒</mdui-segmented-button><mdui-segmented-button value="1000">1 秒</mdui-segmented-button><mdui-segmented-button value="2000">2 秒</mdui-segmented-button></mdui-segmented-button-group></div>
+    <mdui-button slot="action" data-close="settingsDialog">完成</mdui-button>
+  </mdui-dialog>
+
+  <mdui-dialog id="permissionDialog" close-on-esc close-on-overlay-click headline="运行环境">
+    <mdui-segmented-button-group id="backendGroup" selects="single" value="HOOK" full-width aria-label="定位运行模式"><mdui-segmented-button value="HOOK">Hook 模式</mdui-segmented-button><mdui-segmented-button value="ROOT">Root 模式</mdui-segmented-button></mdui-segmented-button-group>
+    <p class="backend-description" id="backendDescription">通过 Xposed／LSPosed 在指定应用内生效，JiDian 不请求 SU。</p>
+    <div class="root-status-card" id="rootStatusCard" role="status" aria-live="polite"><span class="root-status-icon" data-icon="shield"></span><strong id="rootStateLabel">等待模块激活</strong><p id="rootDetail">请在框架管理器中启用 JiDian。</p></div>
+    <div id="hookBackendSettings"><mdui-button id="chooseHookApps" variant="tonal" full-width>选择目标应用</mdui-button><p class="hook-target-summary" id="hookTargetsSummary">尚未选择目标应用</p><div class="hook-target-launches" id="hookTargetLaunches"></div><p class="field-help">在框架管理器中启用 JiDian，作用域勾选目标应用，再重新打开这些应用。仅在两边都选中的应用内生效。</p><mdui-button id="openFramework" variant="text" full-width>打开框架管理器</mdui-button></div>
+    <mdui-button slot="action" data-close="permissionDialog">完成</mdui-button>
+  </mdui-dialog>
+
+  <mdui-dialog id="hookAppsDialog" close-on-esc close-on-overlay-click headline="选择目标应用" class="hook-apps-dialog"><p class="dialog-intro">只为勾选的应用提供模拟定位；其他应用保留真实定位。</p><mdui-text-field id="hookAppSearch" label="搜索应用名称或包名" variant="outlined" clearable autocomplete="off"></mdui-text-field><div class="hook-app-list" id="hookAppList" role="group" aria-label="目标应用列表"></div><p class="hook-selection-count" id="hookSelectionCount">已选 0 个应用</p><mdui-button slot="action" variant="text" data-close="hookAppsDialog">取消</mdui-button><mdui-button slot="action" id="saveHookApps">保存选择</mdui-button></mdui-dialog>
+
+  <mdui-dialog id="overlayDialog" close-on-esc close-on-overlay-click headline="后台悬浮小地图"><p class="dialog-intro">开启后，离开主界面会显示小地图。可拖动标题移动、收起或关闭；点选位置与摇杆调节会同步到定位服务。</p><label class="switch-row"><span><strong>后台显示小地图</strong><small id="overlayStatus">首次开启需允许悬浮窗权限</small></span><mdui-switch id="overlaySwitch" aria-label="后台显示小地图"></mdui-switch></label><mdui-button slot="action" data-close="overlayDialog">完成</mdui-button></mdui-dialog>
+
+  <mdui-dialog id="layerDialog" close-on-esc close-on-overlay-click headline="地图图层"><div class="layer-options"><mdui-button data-layer="amap" variant="tonal" full-width><span slot="icon" data-icon="map"></span>标准地图</mdui-button><mdui-button data-layer="satellite" variant="outlined" full-width><span slot="icon" data-icon="satellite"></span>卫星地图</mdui-button><mdui-button data-layer="osm" variant="outlined" full-width><span slot="icon" data-icon="layers"></span>OpenStreetMap</mdui-button></div><p class="field-help">切换底图后，所选位置与路线保持不变。</p><mdui-button slot="action" variant="text" data-close="layerDialog">返回地图</mdui-button></mdui-dialog>
+
+  <mdui-dialog id="clearDialog" close-on-esc close-on-overlay-click headline="清空这条路线？"><p>所有路线点都会被移除。清空后可以在提示中撤销。</p><mdui-button slot="action" variant="text" data-close="clearDialog">保留路线</mdui-button><mdui-button slot="action" id="confirmClear">清空路线</mdui-button></mdui-dialog>
+  <mdui-dialog id="helpDialog" close-on-esc close-on-overlay-click headline="从这里，开始出发"><div class="help-item"><span data-icon="pin"></span><div><h3>定点模拟</h3><p>点击地图或输入坐标选点。轻微抖动、基站和海拔可分别开启；抖动关闭时坐标固定，海拔关闭时不上报模拟海拔。</p></div></div><div class="help-item"><span data-icon="route"></span><div><h3>路线模拟</h3><p>至少选择 2 个路线点，再设置速度与步频。按点间直线行进，不自动沿道路规划；可选择往返循环。</p></div></div><div class="help-item"><span data-icon="layers"></span><div><h3>卫星与标准地图</h3><p>点击图层按钮选择底图，地图标记和路线会保持在相同位置。</p></div></div><div class="dialog-note"><span data-icon="shield"></span>在运行环境中选择 Hook 或 Root 模式。Hook 需要已运行的 Xposed 兼容框架，仅在所选应用内生效；Root 模式自动请求 SU，修改系统定位。基站和传感器目前仅提供计算数据。</div><mdui-button slot="action" data-close="helpDialog">知道了</mdui-button></mdui-dialog>
+  <mdui-dialog id="liveDialog" close-on-esc close-on-overlay-click headline="实时状态"><div id="mobileLiveContent"></div><mdui-button slot="action" data-close="liveDialog">返回地图</mdui-button></mdui-dialog>
+  <mdui-snackbar id="snackbar" closeable auto-close-delay="4500" aria-live="polite"><span id="snackbarText"></span><mdui-button slot="action" variant="text" id="snackbarAction" hidden>撤销</mdui-button></mdui-snackbar>
+</body>
+</html>

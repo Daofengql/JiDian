@@ -1,0 +1,358 @@
+:root {
+  font-family: "MiSans", "Noto Sans CJK SC", "Microsoft YaHei", system-ui, sans-serif;
+  color-scheme: light; color: #233d36; background: #f7f9f8;
+  --bg: #f7f9f8; --surface: #fff; --surface-soft: #f2f6f4; --text: #233d36;
+  --muted: #78867f; --line: #e5ece7; --accent: #286b56; --accent-soft: #e9f2ec;
+  --map-bg: #e9eee7; --warning: #8c6b2b; --warning-bg: #f5f1e5;
+  --shadow: 0 8px 32px #233d3620; --mdui-color-primary: 40, 107, 86;
+  --mdui-color-on-primary: 255, 255, 255; --mdui-color-primary-container: 219, 237, 224;
+  --mdui-color-on-primary-container: 26, 64, 48;
+  --mdui-typescale-body-large-font: inherit; --mdui-typescale-body-medium-font: inherit;
+  --mdui-typescale-label-large-font: inherit; --mdui-typescale-title-large-font: inherit;
+}
+:root.mdui-theme-dark {
+  color-scheme: dark; --bg: #141c18; --surface: #1d2822; --surface-soft: #233128;
+  --text: #e1ebe3; --muted: #9cae9f; --line: #324239; --accent: #a4d1b6;
+  --accent-soft: #2a4233; --map-bg: #28372d; --warning: #e6c98b; --warning-bg: #352f20;
+  --shadow: 0 8px 32px #0004; --mdui-color-primary: 164, 209, 182;
+  --mdui-color-on-primary: 15, 56, 35; --mdui-color-primary-container: 42, 66, 51;
+  --mdui-color-on-primary-container: 210, 235, 216;
+  color: var(--text); background: var(--bg);
+}
+* { box-sizing: border-box; }
+html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+body { -webkit-tap-highlight-color: transparent; font-size: 14px; line-height: 1.5; color: var(--text); background: var(--bg); }
+button, input { font: inherit; }
+button { color: inherit; }
+button, mdui-button, mdui-button-icon { touch-action: manipulation; }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+[hidden] { display: none !important; }
+[data-icon] { display: inline-flex; flex: none; align-items: center; justify-content: center; }
+[data-icon] svg { display: block; }
+h1, h2, h3, p { margin: 0; }
+mdui-button, mdui-segmented-button { font-weight: 600; letter-spacing: 0; }
+mdui-button { --shape-corner: 12px; }
+mdui-button-icon { flex: none; width: 40px; height: 40px; color: var(--muted); }
+mdui-button-icon svg { width: 20px; height: 20px; }
+mdui-slider { width: 100%; height: 36px; touch-action: pan-y; }
+mdui-slider::part(track-inactive) { background: var(--accent-soft); }
+mdui-segmented-button-group { --shape-corner: 10px; }
+mdui-segmented-button { height: 36px; font-size: 12px; }
+mdui-segmented-button::part(button) { border-color: var(--line); }
+mdui-segmented-button [data-icon] svg { width: 17px; height: 17px; }
+.app-shell { --panel-height: 120px; --edge: 24px; --panel-width: 360px; height: 100%; }
+.workspace, .map-workspace, .map-card { position: absolute; inset: 0; }
+.map-card { isolation: isolate; background: var(--map-bg); }
+#map { position: absolute; inset: 0; z-index: 0; cursor: crosshair; background: var(--map-bg); }
+.leaflet-container { font: inherit; -webkit-tap-highlight-color: transparent; }
+.leaflet-control-attribution { font-size: 8px !important; background: var(--surface) !important; color: var(--muted) !important; padding: 1px 6px !important; border-radius: 5px 0 0 0; opacity: .9; }
+.leaflet-control-attribution a { color: var(--accent) !important; }
+.mdui-theme-dark body:not(.satellite-mode) .leaflet-tile-pane { filter: brightness(.62) saturate(.6); }
+.map-top { position: absolute; inset: var(--edge) var(--edge) auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; pointer-events: none; }
+.map-top > * { pointer-events: auto; }
+.coordinate-button { height: 42px; font-size: 12px; --shape-corner: 14px; }
+.coordinate-button::part(button) { background: var(--surface); color: var(--text); box-shadow: var(--shadow); padding: 0 15px; }
+.coordinate-button [data-icon] { color: var(--accent); }
+.map-actions { display: flex; padding: 1px 3px; border-radius: 14px; background: var(--surface); box-shadow: var(--shadow); }
+.map-actions .needs-permission { color: var(--warning); background: var(--warning-bg); border-radius: 50%; }
+.map-tools { position: absolute; top: calc(var(--edge) + 58px); right: var(--edge); display: flex; flex-direction: column; align-items: center; padding: 3px; border-radius: 14px; background: var(--surface); box-shadow: var(--shadow); }
+.map-tools mdui-button-icon { color: var(--text); }
+.tool-divider { width: 22px; height: 1px; background: var(--line); margin: 2px 0; }
+.selected { color: var(--accent); background: var(--accent-soft); border-radius: 50%; }
+.route-tools { position: absolute; left: var(--edge); top: calc(var(--edge) + 58px); display: flex; gap: 8px; }
+.route-tools mdui-button { height: 36px; font-size: 11px; }
+.route-tools mdui-button::part(button), .route-tools mdui-button-icon::part(button) { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+.route-tools mdui-button-icon { width: 36px; height: 36px; }
+.tile-message { position: absolute; top: calc(var(--edge) + 58px); left: var(--edge); right: calc(var(--edge) + 60px); display: flex; align-items: center; gap: 6px; max-width: 430px; padding: 5px 6px 5px 12px; border-radius: 12px; background: var(--surface); font-size: 11px; box-shadow: var(--shadow); z-index: 3; }
+.route-mode .tile-message { top: calc(var(--edge) + 104px); }
+.tile-message span { flex: 1; }
+.tile-message mdui-button { height: 32px; font-size: 11px; }
+.selection-card { position: absolute; left: var(--edge); bottom: calc(var(--edge) + var(--panel-height) + 10px); width: var(--panel-width); max-width: calc(100% - var(--edge) * 2); display: flex; align-items: center; gap: 8px; padding: 10px 10px 10px 14px; border: 1px solid var(--line); border-radius: 15px; background: var(--surface); box-shadow: var(--shadow); pointer-events: auto; }
+.selection-icon { display: none; }
+.selection-content { min-width: 0; flex: 1; }
+.selection-heading { display: flex; align-items: center; gap: 8px; }
+.selection-heading strong { font-size: 10px; font-weight: 600; }
+.coordinate-system { font-size: 8px; color: var(--muted); }
+.coordinate-value { font-variant-numeric: tabular-nums; font-family: "Segoe UI", system-ui, sans-serif; font-size: 14px; font-weight: 600; margin-top: 2px; }
+.selection-hint { display: none; }
+.selection-card mdui-button-icon { width: 32px; height: 32px; }
+.selection-card mdui-button-icon svg { width: 17px; height: 17px; }
+.control-panel { position: absolute; z-index: 500; left: var(--edge); bottom: var(--edge); width: var(--panel-width); max-width: calc(100% - var(--edge) * 2); max-height: calc(100% - 170px); display: flex; flex-direction: column; padding: 12px; border: 1px solid var(--line); border-radius: 22px; background: var(--surface); box-shadow: var(--shadow); }
+.floating-toolbar { display: flex; align-items: center; gap: 10px; flex: none; }
+#joystickToggle { width: 34px; height: 36px; }
+.joystick-panel { display: flex; flex: none; align-items: center; gap: 14px; padding: 12px 0 4px; border-top: 1px solid var(--line); margin-top: 10px; }
+.joystick-pad { position: relative; width: 96px; height: 96px; flex: none; touch-action: none; user-select: none; border: 1px solid var(--line); border-radius: 50%; background: var(--surface-soft); cursor: grab; }
+.joystick-pad:active { cursor: grabbing; }
+.joystick-pad:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.joystick-cross::before, .joystick-cross::after { content: ""; position: absolute; background: var(--line); }
+.joystick-cross::before { width: 1px; height: 70px; left: 47px; top: 12px; }
+.joystick-cross::after { width: 70px; height: 1px; top: 47px; left: 12px; }
+.joystick-knob { position: absolute; width: 36px; height: 36px; border-radius: 50%; left: 29px; top: 29px; background: var(--accent); border: 3px solid var(--surface); box-shadow: 0 2px 8px #17392c30; pointer-events: none; will-change: transform; }
+.joystick-info { min-width: 0; flex: 1; }
+.joystick-info strong { font-size: 12px; display: block; }
+.joystick-info > span { font-size: 9px; line-height: 1.7; color: var(--muted); display: block; margin: 3px 0 5px; }
+.joystick-info mdui-button { height: 28px; font-size: 10px; }
+#modeGroup { flex: 1; min-width: 0; }
+#modeGroup mdui-segmented-button { flex: 1; min-width: 0; }
+#modeGroup mdui-segmented-button::part(button) { padding: 0 12px; }
+#panelToggle { height: 36px; font-size: 11px; --shape-corner: 10px; }
+#panelToggle::part(button) { padding: 0 10px; }
+#panelToggle svg { width: 17px; height: 17px; }
+.panel-scroll { overflow-y: auto; min-height: 0; scrollbar-width: thin; overscroll-behavior: contain; margin: 12px 0 0; border-top: 1px solid var(--line); }
+.point-card, .movement-card { padding: 8px 2px 4px; }
+.section-heading, .settings-divider, .speed-note { display: none; }
+.point-options .switch-row { padding: 5px 0; }
+.point-options .switch-row + .switch-row { border-top: 1px solid var(--line); }
+.point-options .switch-row small { font-size: 9px; }
+.point-card .setting-link { border-top: 1px solid var(--line); }
+.speed-heading { display: flex; align-items: baseline; justify-content: space-between; margin: 4px 0 10px; }
+.speed-heading > label { font-size: 12px; font-weight: 600; }
+.speed-value { display: flex; align-items: baseline; gap: 5px; }
+.speed-value strong { color: var(--accent); font-size: 28px; line-height: 1; font-weight: 650; font-variant-numeric: tabular-nums; }
+.speed-value > span { font-size: 10px; color: var(--muted); }
+.speed-presets { display: flex; gap: 8px; }
+.speed-presets mdui-button { height: 30px; flex: 1; min-width: 0; font-size: 11px; --shape-corner: 8px; }
+.speed-presets mdui-button::part(button) { padding: 0 9px; border-color: var(--line); color: var(--muted); }
+.speed-presets mdui-button span { font-size: 10px; margin-left: 6px; opacity: .7; }
+.speed-presets mdui-button.active::part(button) { background: var(--accent-soft); border-color: var(--accent-soft); color: var(--accent); }
+.slider-labels { display: flex; justify-content: space-between; font-size: 9px; color: var(--muted); margin-top: -3px; margin-bottom: 5px; }
+.slider-labels span:nth-child(2) { color: var(--accent); }
+.setting-link { display: flex; width: 100%; align-items: center; gap: 8px; border: 0; background: none; text-align: left; padding: 10px 0; cursor: pointer; }
+.setting-link-icon { width: 24px; color: var(--muted); }
+.setting-link-icon svg { width: 19px; height: 19px; }
+.setting-link > span:nth-child(2) { flex: 1; }
+.setting-link strong { display: block; font-size: 12px; font-weight: 600; }
+.setting-link small { font-size: 9px; color: var(--muted); margin-top: 2px; display: block; }
+.setting-link > [data-icon]:last-child { color: var(--muted); }
+.setting-link > [data-icon]:last-child svg { width: 14px; height: 14px; }
+.movement-card .setting-link { display: inline-flex; width: calc(50% - 3px); padding-top: 9px; padding-bottom: 4px; }
+.movement-card .setting-link:last-child { border-left: 1px solid var(--line); padding-left: 10px; }
+.movement-card .setting-link small { font-size: 8px; }
+.start-area { display: flex; align-items: center; gap: 12px; padding-top: 12px; flex: none; }
+.expanded .start-area { border-top: 1px solid var(--line); margin-top: 8px; }
+.start-context { flex: 1; min-width: 0; font-size: 10px; }
+.connection-status { display: flex; align-items: center; gap: 6px; font-size: 11px; }
+.connection-status i, .live-dot { width: 6px; height: 6px; border-radius: 50%; background: #9eafa3; }
+.connection-status.running { color: var(--accent); }
+.connection-status.running i, .running .live-dot { background: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent); }
+#startContextDetail { display: block; color: var(--muted); font-size: 9px; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#liveDetailsButton { height: 22px; font-size: 10px; margin-top: 2px; }
+#liveDetailsButton::part(button) { padding: 0; }
+#liveDetailsButton svg { width: 12px; height: 12px; }
+.start-button { width: 55%; height: 44px; font-size: 13px; --shape-corner: 13px; }
+.start-button svg { width: 17px; height: 17px; }
+.start-button.is-running { --mdui-color-primary: 162, 62, 52; --mdui-color-on-primary: 255, 255, 255; }
+.live-card { display: none; }
+#mobileLiveContent .live-card { display: block; }
+.live-heading { display: flex; align-items: center; gap: 7px; }
+.live-heading h2 { font-size: 12px; font-weight: 600; }
+.live-heading > span:last-child { font-size: 10px; margin-left: auto; color: var(--muted); }
+.live-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 20px 0; }
+.live-grid > div > span { display: block; font-size: 11px; color: var(--muted); }
+.live-grid strong { display: block; font-size: 25px; font-weight: 600; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.live-grid small { color: var(--muted); font-size: 10px; margin-left: 5px; font-weight: 400; }
+.point-live-grid strong { font-size: 22px; }
+.live-location { display: flex; align-items: center; gap: 6px; border-top: 1px solid var(--line); min-height: 38px; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.live-location > [data-icon] svg { width: 14px; height: 14px; }
+.live-location mdui-button-icon { margin-left: auto; width: 34px; height: 34px; }
+.live-location mdui-button-icon svg { width: 17px; height: 17px; }
+.map-marker { border: 0; background: none; }
+.point-marker { display: block; width: 32px; height: 40px; filter: drop-shadow(0 2px 3px #102f3340); }
+.point-marker svg { display: block; width: 32px; height: 40px; }
+.number-marker { display: grid; place-items: center; width: 24px; height: 24px; border: 2px solid #087f72; border-radius: 50%; background: #fff; color: #076b60; font: 700 10px/1 system-ui; box-shadow: 0 1px 4px #12382d35; }
+.number-marker.first { background: #087f72; border-color: white; color: white; }
+.number-marker.last { background: #e27540; border-color: white; color: white; }
+.map-marker:focus-visible { outline: 3px solid #2f97c9; outline-offset: 4px; border-radius: 50%; }
+.live-marker { display: block; border: 3px solid white; width: 18px; height: 18px; background: #3b8eb4; border-radius: 50%; box-shadow: 0 0 0 7px #3b8eb424, 0 2px 8px #0002; }
+.leaflet-dragging #map, .leaflet-dragging .leaflet-interactive { cursor: grabbing; }
+mdui-dialog { --shape-corner: 24px; --z-index: 2000; }
+mdui-dialog::part(panel) { max-width: min(520px, calc(100vw - 32px)); background: var(--surface); color: var(--text); }
+mdui-dialog::part(headline) { font-size: 22px; font-weight: 650; letter-spacing: 0; }
+mdui-dialog::part(body) { font-size: 13px; line-height: 1.7; }
+mdui-dialog::part(action) { gap: 8px; }
+.dialog-intro { font-size: 12px; color: var(--muted); margin-bottom: 22px; }
+.coordinate-fields { display: grid; gap: 20px; }
+.import-entry { margin-top: 12px; }
+.import-dialog::part(panel) { width: 480px; }
+.import-dialog .dialog-intro { margin-bottom: 16px; }
+.import-status { margin: 14px 0; color: var(--muted); font-size: 11px; overflow-wrap: anywhere; }
+.import-preview { padding: 12px; border-radius: 12px; background: var(--surface-soft); }
+.import-preview > strong { font-size: 13px; }
+.import-preview > p { font-size: 11px; overflow-wrap: anywhere; margin-top: 5px; }
+.import-preview #importCoordinates { font-variant-numeric: tabular-nums; }
+.import-preview mdui-segmented-button-group { width: 100%; }
+.import-preview mdui-segmented-button { flex: 1; }
+.import-candidates { display: flex; flex-wrap: wrap; gap: 6px; max-height: 110px; overflow-y: auto; margin-top: 10px; }
+.import-candidates:empty { display: none; }
+.import-candidates mdui-button { height: 32px; max-width: 100%; font-size: 11px; }
+.system-overlay .import-entry { display: none; }
+mdui-text-field { width: 100%; --shape-corner: 12px; }
+mdui-text-field::part(input) { font-variant-numeric: tabular-nums; }
+.dialog-note { margin-top: 22px; padding: 12px; border-radius: 10px; background: var(--surface-soft); color: var(--muted); font-size: 11px; display: flex; gap: 8px; align-items: flex-start; }
+.dialog-note svg { width: 16px; height: 16px; margin-top: 2px; }
+.dialog-section + .dialog-section { border-top: 1px solid var(--line); margin-top: 22px; padding-top: 20px; }
+.dialog-section[hidden] + .dialog-section { border: 0; margin-top: 0; padding-top: 0; }
+.switch-row { display: flex; align-items: center; gap: 12px; justify-content: space-between; padding: 16px 0; }
+.switch-row > span { flex: 1; }
+.switch-row strong { font-size: 12px; font-weight: 550; display: block; }
+.switch-row small { font-size: 10px; color: var(--muted); display: block; margin-top: 3px; line-height: 1.7; }
+.switch-row mdui-switch { flex: none; }
+.field-help { font-size: 10px; color: var(--muted); margin: 10px 0; }
+.field-value { font-size: 12px; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 16px 0 10px; }
+.field-value > small, .field-value strong small { font-size: 10px; color: var(--muted); font-weight: 400; }
+.field-value strong { color: var(--accent); font-size: 18px; }
+.capability-note { font-size: 10px; line-height: 1.7; color: var(--muted); padding: 9px 12px; background: var(--surface-soft); border-radius: 8px; }
+.root-status-card { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; padding: 12px 8px 18px; }
+.root-status-icon { width: 56px; height: 56px; border-radius: 18px; background: var(--surface-soft); color: var(--muted); }
+.root-status-icon svg { width: 30px; height: 30px; }
+.root-status-card.ready .root-status-icon { background: var(--accent-soft); color: var(--accent); }
+.root-status-card.checking .root-status-icon { animation: root-pulse 1.4s ease-in-out infinite alternate; }
+.root-status-card strong { font-size: 18px; }
+.root-status-card p { color: var(--muted); font-size: 12px; line-height: 1.8; max-width: 300px; }
+.backend-description { color: var(--muted); font-size: 11px; line-height: 1.7; margin: 12px 0; }
+#backendGroup { width: 100%; }
+#backendGroup mdui-segmented-button { flex: 1; }
+.hook-target-summary { color: var(--accent); font-size: 11px; margin: 10px 0; overflow-wrap: anywhere; }
+.hook-target-launches { display: grid; gap: 8px; }
+.hook-target-launches mdui-button { height: 36px; font-size: 11px; }
+.hook-apps-dialog::part(panel) { width: 460px; }
+.hook-app-list { min-height: 72px; max-height: min(340px, 40vh); overflow-y: auto; overscroll-behavior: contain; margin-top: 12px; }
+.hook-app-row { display: flex; gap: 8px; align-items: center; padding: 5px 0; cursor: pointer; }
+.hook-app-row + .hook-app-row { border-top: 1px solid var(--line); }
+.hook-app-row mdui-checkbox { flex: none; }
+.hook-app-row > span { min-width: 0; }
+.hook-app-row strong { display: block; font-size: 12px; font-weight: 550; }
+.hook-app-row small { display: block; color: var(--muted); font-size: 10px; overflow-wrap: anywhere; }
+.hook-selection-count, .hook-list-empty { color: var(--muted); font-size: 11px; padding: 10px 0; }
+@keyframes root-pulse { to { opacity: .45; } }
+.layer-options { display: grid; gap: 12px; }
+.layer-options mdui-button { height: 52px; font-size: 13px; }
+.layer-options mdui-button svg { width: 21px; height: 21px; }
+.help-item { display: flex; gap: 14px; margin: 10px 0 24px; }
+.help-item > [data-icon] { color: var(--accent); background: var(--accent-soft); border-radius: 10px; width: 36px; height: 36px; }
+.help-item h3 { font-size: 13px; margin-bottom: 5px; }
+.help-item p { font-size: 12px; color: var(--muted); }
+mdui-snackbar { --z-index: 3000; max-width: calc(100vw - 32px); font-size: 12px; bottom: calc(var(--panel-height, 120px) + 36px); }
+@media (max-width: 600px) {
+  .app-shell { --edge: 12px; --panel-width: calc(100% - 24px); }
+  .coordinate-button { height: 40px; font-size: 11px; }
+  .map-actions mdui-button-icon { width: 36px; height: 38px; }
+  .map-actions svg { width: 19px; height: 19px; }
+  .map-tools mdui-button-icon { width: 36px; height: 36px; }
+  .coordinate-value { font-size: 13px; }
+  .tile-message { font-size: 10px; }
+  .control-panel { border-radius: 20px; }
+}
+@media (max-width: 350px) {
+  .floating-toolbar { gap: 7px; }
+  #modeGroup mdui-segmented-button::part(button) { padding: 0 9px; }
+  .coordinate-value { font-size: 11px; }
+  .movement-card .setting-link small { font-size: 8px; }
+}
+@media (max-height: 650px) {
+  .import-dialog .dialog-intro { display: none; }
+  .import-dialog::part(action) { padding-top: 16px; }
+  .import-dialog .import-status { margin: 10px 0; }
+  .point-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
+  .point-options .switch-row { flex-direction: column; gap: 0; padding: 0; }
+  .point-options .switch-row + .switch-row { border: 0; }
+  .point-options .switch-row > span { flex: none; }
+  .point-options .switch-row strong { font-size: 10px; }
+  .point-options .switch-row small { display: none; }
+  .point-card .setting-link { padding: 7px 0 0; }
+  .speed-heading { margin-bottom: 5px; }
+  .speed-presets mdui-button { height: 28px; }
+}
+@media (max-height: 520px) and (orientation: landscape) {
+  .app-shell { --edge: 12px; --panel-width: 300px; }
+  .control-panel { left: auto; right: var(--edge); max-height: calc(100% - 82px); }
+  .selection-card { bottom: var(--edge); width: min(360px, calc(100% - 336px)); }
+  .map-tools { right: auto; left: var(--edge); top: calc(var(--edge) + 56px); flex-direction: row; }
+  .map-tools .tool-divider { width: 1px; height: 18px; margin: 0 2px; }
+  .map-tools #zoomIn, .map-tools #zoomOut { display: none; }
+  .route-tools { top: calc(var(--edge) + 108px); }
+  .tile-message { top: calc(var(--edge) + 108px); max-width: calc(100% - 336px); }
+  .route-mode .tile-message { top: calc(var(--edge) + 154px); }
+  .map-actions mdui-button-icon { width: 36px; height: 38px; }
+  .movement-card { padding-top: 4px; }
+  .speed-heading { margin-top: 0; }
+  #speedSlider { height: 32px; }
+  .movement-card .setting-link { padding-top: 6px; padding-bottom: 2px; }
+  .movement-card .setting-link small { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+/* The service loads the same MDUI interface into its small overlay WebView. */
+.system-overlay .app-shell { --edge: 8px; --panel-width: calc(100% - 16px); }
+.system-overlay .map-actions, .system-overlay #zoomIn, .system-overlay #zoomOut, .system-overlay .tool-divider { display: none; }
+.system-overlay .map-tools { top: 8px; right: 8px; flex-direction: row; padding: 1px; }
+.system-overlay .map-tools mdui-button-icon { width: 30px; height: 32px; }
+.system-overlay .map-tools svg { width: 17px; height: 17px; }
+.system-overlay .coordinate-button { height: 34px; font-size: 10px; }
+.system-overlay .coordinate-button::part(button) { padding: 0 10px; }
+.system-overlay .coordinate-button svg { width: 16px; height: 16px; }
+.system-overlay .control-panel { padding: 8px; border-radius: 16px; max-height: calc(100% - 110px); }
+.system-overlay .floating-toolbar { gap: 5px; }
+.system-overlay #modeGroup mdui-segmented-button { height: 32px; font-size: 11px; }
+.system-overlay #modeGroup mdui-segmented-button::part(button) { padding: 0 8px; }
+.system-overlay #panelToggle { width: 34px; min-width: 34px; height: 32px; }
+.system-overlay #panelToggle::part(button) { padding: 0; }
+.system-overlay #panelToggleLabel { display: none; }
+.system-overlay #panelToggle [slot="icon"] { margin: 0; }
+.system-overlay #joystickToggle { width: 30px; height: 32px; }
+.system-overlay .start-area { padding-top: 8px; gap: 8px; }
+.system-overlay .start-button { height: 38px; font-size: 11px; }
+.system-overlay .selection-card { padding: 7px 7px 7px 10px; border-radius: 12px; }
+.system-overlay .coordinate-value { font-size: 10px; }
+.system-overlay .selection-heading strong { font-size: 9px; }
+.system-overlay .coordinate-system { font-size: 7px; }
+.system-overlay .route-tools { top: 50px; gap: 5px; }
+.system-overlay .route-tools mdui-button { height: 30px; font-size: 10px; }
+.system-overlay .route-tools mdui-button-icon { width: 30px; height: 30px; }
+.system-overlay .joystick-panel { padding-top: 8px; margin-top: 8px; gap: 10px; }
+.system-overlay .joystick-pad { width: 88px; height: 88px; }
+.system-overlay .joystick-knob { left: 25px; top: 25px; }
+.system-overlay .joystick-cross::before { left: 43px; top: 8px; }
+.system-overlay .joystick-cross::after { top: 43px; left: 8px; }
+.system-overlay .joystick-info strong { font-size: 11px; }
+.system-overlay .joystick-info > span { font-size: 8px; }
+.system-overlay mdui-dialog { padding: 6px; }
+.system-overlay mdui-dialog::part(panel) { padding: 0; min-width: 0; width: calc(100vw - 12px); max-width: calc(100vw - 12px); max-height: calc(100vh - 12px); flex-shrink: 0; --shape-corner: 16px; }
+.system-overlay mdui-dialog::part(headline) { font-size: 17px; }
+.system-overlay mdui-dialog::part(body) { padding-left: 16px; padding-right: 16px; }
+.system-overlay .dialog-intro { margin-bottom: 12px; font-size: 10px; }
+.system-overlay .coordinate-fields { gap: 12px; }
+.system-overlay .dialog-note { display: none; }
+
+/* The background window exposes only the controls needed while using another app. */
+.system-overlay .floating-toolbar, .system-overlay .panel-scroll, .system-overlay .selection-card,
+.system-overlay .start-context, .system-overlay .route-tools, .system-overlay #refreshPoint,
+.system-overlay .coordinate-button #coordinateButtonLabel,
+.system-overlay.route-mode #coordinateButton { display: none !important; }
+.system-overlay .coordinate-button { width: 32px; min-width: 32px; height: 32px; }
+.system-overlay .coordinate-button::part(button) { padding: 0; }
+.system-overlay .coordinate-button::part(icon) { margin: 0; }
+.system-overlay .coordinate-button::part(label) { display: none; }
+.system-overlay .coordinate-button [slot="icon"] { margin: 0; }
+.system-overlay .control-panel { padding: 6px; border-radius: 12px; max-height: calc(100% - 80px); }
+.system-overlay .start-area { padding-top: 0; }
+.system-overlay .start-button { width: 100%; height: 30px; font-size: 10px; --shape-corner: 8px; }
+.system-overlay .start-button svg { width: 14px; height: 14px; }
+.system-overlay .joystick-panel { padding: 0 2px 6px; margin: 0 0 6px; border-top: 0; border-bottom: 1px solid var(--line); gap: 12px; }
+.system-overlay .joystick-pad { width: 64px; height: 64px; }
+.system-overlay .joystick-knob { width: 28px; height: 28px; left: 17px; top: 17px; }
+.system-overlay .joystick-cross::before { height: 48px; left: 31px; top: 7px; }
+.system-overlay .joystick-cross::after { width: 48px; top: 31px; left: 7px; }
+.system-overlay .joystick-info > span { display: none; }
+.system-overlay .joystick-info strong { font-size: 10px; margin-bottom: 5px; }
+.system-overlay .joystick-info mdui-button { height: 26px; font-size: 10px; }
+.system-overlay .coordinate-dialog .dialog-intro { display: none; }
+.system-overlay mdui-dialog::part(headline) { padding: 12px 14px 8px; }
+.system-overlay mdui-dialog::part(body) { padding: 8px 14px; margin-top: 0; }
+.system-overlay mdui-dialog::part(action) { padding: 8px 10px; gap: 4px; }
+.system-overlay mdui-dialog mdui-button { height: 30px; font-size: 10px; }
+.system-overlay mdui-dialog mdui-button::part(button) { padding: 0 10px; }
+.system-overlay .coordinate-dialog mdui-text-field::part(helper) { display: none; }
+.system-overlay .coordinate-dialog mdui-text-field::part(supporting) { min-height: 0; }

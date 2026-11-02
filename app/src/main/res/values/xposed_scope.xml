@@ -1,0 +1,6 @@
+<resources>
+    <string-array name="xposed_scope">
+        <item>com.root.fakeloc</item>
+        <item>com.chaoxing.mobile</item>
+    </string-array>
+</resources>
